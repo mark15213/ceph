@@ -136,3 +136,40 @@ out:
 sqlite3_finalize(stmt);
 ASSERT_EQ(0, rc);
 }
+
+int main(int argc, char **argv) {
+    vector<const char*> args;
+    argv_to_vec(argc, (const char **)argv, args);
+
+    std::string conf_file_list;
+    std::string cluster;
+    CephInitParameters iparams = ceph_argparse_early_args(args, CEPH_ENTITY_TYPE_CLIENT, &cluster, &conf_file_list);
+    cct = boost::intrusive_ptr<CephContext>(common_preinit(iparams, CODE_ENVIRONMENT_UTILITY, 0), false);
+    cct->_conf.parse_config_files(conf_file_list.empty() ? nullptr : conf_file_list.c_str(), &std::cerr, 0);
+    cct->_conf.parse_env(cct->get_module_type()); // environment variables override
+    cct->_conf.parse_argv(args);
+    cct->_conf.apply_changes(nullptr);
+    common_init_finish(cct.get());
+
+    ldout(cct, 1) << "sqlite3 version: " << sqlite3_libversion() << dendl;
+    if (int rc = sqlite3_config(SQLITE_CONFIG_URI, 1); rc) {
+        lderr(cct) << "sqlite3 config failed: " << rc << dendl;
+        exit(EXIT_FAILURE);
+    }
+
+    sqlite3_auto_extension((void (*)())sqlite3_cephfssqlite_init);
+    sqlite3* db = nullptr;
+    if (int rc = sqlite3_open_v2(":memory:", &db, SQLITE_OPEN_READWRITE, nullptr); rc == SQLITE_OK) {
+        sqlite3_close(db);
+    } else {
+        lderr(cct) << "could not open sqlite3: " << rc << dendl;
+        exit(EXIT_FAILURE);
+    }
+    if (int rc = cephfssqlite_setcct(cct.get(), nullptr); rc < 0) {
+        lderr(cct) << "could not set cct: " << rc << dendl;
+        exit(EXIT_FAILURE);
+    }
+
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
