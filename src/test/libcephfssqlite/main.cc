@@ -58,7 +58,7 @@ static boost::intrusive_ptr<CephContext> cct;
 
 class CephFSSQLiteTest : public ::testing::Test {
 public:
-    inline static const std::string fsname = "cephfssqlite";
+    inline static const std::string fsname = "cephfssqlite/";
 
     void SetUp() override {
         uuid.generate_random();
