@@ -104,7 +104,7 @@ protected:
     }
 
     virtual std::string get_uri() const {
-        auto uri = fmt::format("file:{}//{}?vfs=cephfs", fsname, get_name());
+        auto uri = fmt::format("file:{}/{}?vfs=cephfs", fsname, get_name());
         return uri;
     }
     virtual std::string get_name() const {
