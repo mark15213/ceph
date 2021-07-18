@@ -347,10 +347,10 @@ static int FileSize(sqlite3_file *file, sqlite_int64 *osize)
 
 static bool parsepath(std::string_view path, struct cephfssqlite_fileloc* fileloc)
 {
-    static const std::regex re2{"^/*([[:alnum:]-_.]+)/([[:alnum:]-_./]+)$"};
+    std::regex regex{"^file:/*([[:alnum:]-_.]+)/([[:alnum:]-._/]+)\\?vfs=cephfs$"};
 
     std::cmatch cm;
-    if (std::regex_match(path.data(), cm, re2)) {
+    if (std::regex_match(path.data(), cm, regex)) {
         fileloc->fsname = cm[1];
         fileloc->path = cm[2];
         return true;
