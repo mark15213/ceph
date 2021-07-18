@@ -458,7 +458,7 @@ static int Open(sqlite3_vfs *vfs, const char *name, sqlite3_file *file,
 
     auto f = new (file)cephfssqlite_file();
     f->vfs = vfs;
-    std::cout << "parth is" << path << std::endl;
+    std::cout << "parth is " << path << std::endl;
     if (!parsepath(path, &f->loc)) {
         ceph_assert(0); /* xFullPathname validates! */
     }
