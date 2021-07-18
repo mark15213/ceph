@@ -578,6 +578,7 @@ static int Access(sqlite3_vfs* vfs, const char* path, int flags, int* result)
  */
 static int FullPathname(sqlite3_vfs* vfs, const char* ipath, int opathlen, char* opath)
 {
+    auto start = ceph::coarse_mono_clock::now();
     auto path = std::string_view(ipath);
 
     dv(5) << "1: " <<  path << dendl;
