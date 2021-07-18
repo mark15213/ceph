@@ -91,8 +91,8 @@ protected:
         int rc;
 
         auto&& name = get_uri();
-        sqlcatch(sqlite3_open_v2(name.c_str(), &db, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE|SQLITE_OPEN_URI, "cephfs"));
         std::cout << "using database: " << name << std::endl;
+        sqlcatch(sqlite3_open_v2(name.c_str(), &db, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE|SQLITE_OPEN_URI, "cephfs"));
 
         std::cout << SQL << std::endl;
         sqlcatch(sqlite3_exec(db, current, NULL, NULL, NULL));
