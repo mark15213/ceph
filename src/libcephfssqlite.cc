@@ -347,7 +347,7 @@ static int FileSize(sqlite3_file *file, sqlite_int64 *osize)
 
 static bool parsepath(std::string_view path, struct cephfssqlite_fileloc* fileloc)
 {
-    std::regex regex{"^file:/*([[:alnum:]-_.]+)/([[:alnum:]-._/]+)\\?vfs=cephfs$"};
+    std::regex regex{"^/*([[:alnum:]-_.]+)/([[:alnum:]-._/]+)$"};
 
     std::cmatch cm;
     if (std::regex_match(path.data(), cm, regex)) {
@@ -456,9 +456,9 @@ static int Open(sqlite3_vfs *vfs, const char *name, sqlite3_file *file,
 
     dv(5) << path << " flags=" << std::hex << flags << dendl;
 
+    std::cout << "parth is " << path << std::endl;
     auto f = new (file)cephfssqlite_file();
     f->vfs = vfs;
-    std::cout << "parth is " << path << std::endl;
     if (!parsepath(path, &f->loc)) {
         ceph_assert(0); /* xFullPathname validates! */
     }
@@ -578,7 +578,6 @@ static int Access(sqlite3_vfs* vfs, const char* path, int flags, int* result)
  */
 static int FullPathname(sqlite3_vfs* vfs, const char* ipath, int opathlen, char* opath)
 {
-    auto start = ceph::coarse_mono_clock::now();
     auto path = std::string_view(ipath);
 
     dv(5) << "1: " <<  path << dendl;
@@ -590,7 +589,7 @@ static int FullPathname(sqlite3_vfs* vfs, const char* ipath, int opathlen, char*
     }
     dv(5) << " parsed " << fileloc << dendl;
 
-    auto p = fmt::format("file:///{}{}?vfs=cephfs", fileloc.fsname, fileloc.path);
+    auto p = fmt::format("{}/{}", fileloc.fsname, fileloc.path);
     if (p.size() >= (size_t)opathlen) {
         dv(5) << "path too long!" << dendl;
         return SQLITE_CANTOPEN;
