@@ -208,6 +208,7 @@ static CephContext* getcct(sqlite3_vfs* vfs)
 
 static int Lock(sqlite3_file *file, int ilock)
 {
+    std::cout << "Call function: " << __FUNCTION__ << " ilock "<< ilock << std::endl;
   auto f = (cephsqlite_file*)file;
   auto start = ceph::coarse_mono_clock::now();
   df(5) << std::hex << ilock << dendl;
@@ -230,6 +231,7 @@ static int Lock(sqlite3_file *file, int ilock)
 
 static int Unlock(sqlite3_file *file, int ilock)
 {
+    std::cout << "Call function: " << __FUNCTION__ << " ilock "<< ilock << std::endl;
   auto f = (cephsqlite_file*)file;
   auto start = ceph::coarse_mono_clock::now();
   df(5) << std::hex << ilock << dendl;
@@ -252,10 +254,12 @@ static int Unlock(sqlite3_file *file, int ilock)
 
 static int CheckReservedLock(sqlite3_file *file, int *result)
 {
+    std::cout << "Call function: " << __FUNCTION__ << std::endl;
   auto f = (cephsqlite_file*)file;
   auto start = ceph::coarse_mono_clock::now();
   df(5) << dendl;
-
+  *result = 0;
+  
   auto& lock = f->lock;
   if (lock > SQLITE_LOCK_SHARED) {
     *result = 1;
@@ -265,9 +269,9 @@ static int CheckReservedLock(sqlite3_file *file, int *result)
   f->io.rs->print_lockers(*_dout);
   *_dout << dendl;
 
-  *result = 0;
   auto end = ceph::coarse_mono_clock::now();
   getdata(f->vfs).logger->tinc(P_OPF_CHECKRESERVEDLOCK, end-start);
+    std::cout << "Result " << *result << std::endl;
   return SQLITE_OK;
 }
 
